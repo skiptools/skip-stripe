@@ -10,6 +10,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 #elseif os(iOS)
 // https://docs.stripe.com/payments/accept-a-payment?platform=ios&ui=payment-sheet&uikit-swiftui=swiftui
+import Stripe
+import StripeCore
+import StripePayments
+import StripePaymentsUI
 import StripePaymentSheet
 #endif
 
