@@ -4,10 +4,12 @@ import Foundation
 import SwiftUI
 
 #if SKIP
+// https://docs.stripe.com/payments/accept-a-payment?platform=android&ui=payment-sheet
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 #elseif os(iOS)
+// https://docs.stripe.com/payments/accept-a-payment?platform=ios&ui=payment-sheet&uikit-swiftui=swiftui
 import StripePaymentSheet
 #endif
 
