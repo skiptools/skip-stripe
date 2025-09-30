@@ -29,3 +29,10 @@ public class SkipStripeModule {
         #endif
     }
 }
+
+public struct StripeView : View {
+    public var body: some View {
+        Text("Stripe integration WIP")
+    }
+}
+
