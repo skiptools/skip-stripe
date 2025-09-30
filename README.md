@@ -14,30 +14,30 @@ and [Android](https://docs.stripe.com/payments/accept-a-payment?platform=android
 import SkipStripe
 
 struct PaymentButton: View {
+    let paymentConfig = StripePaymentConfiguration(
+        publishableKey: "PUBLISHABLE_KEY",
+        merchantName: "Merchant, Inc.",
+        customerID: "CUSTOMER_ID",
+        ephemeralKeySecret: "EPHEMERAL_KEY_SECRET",
+        clientSecret: "CLIENT_SECRET"
+    )
+
     var body: some View {
-        let config = StripePaymentConfiguration(
-            publishableKey: "PUBLISHABLE_KEY",
-            merchantName: "Merchant, Inc.",
-            customerID: "CUSTOMER_ID",
-            ephemeralKeySecret: "EPHEMERAL_KEY_SECRET",
-            clientSecret: "CLIENT_SECRET"
-        )
-
-        let completion = { (result: StripePaymentResult) in
-            switch result {
-            case .completed:
-                logger.log("Payment completed")
-            case .canceled:
-                logger.log("Payment canceled")
-            case .failed(error: let error):
-                logger.log("Payment error: \(error)")
-            }
-        }
-
-        StripePaymentButton(configuration: config, completion: completion) {
+        StripePaymentButton(configuration: paymentConfig, completion: paymentCompletion) {
             Text("Pay Now!")
         }
         .buttonStyle(.borderedProminent)
+    }
+
+    func paymentCompletion(result: StripePaymentResult) {
+        switch result {
+        case .completed:
+            logger.log("Payment completed")
+        case .canceled:
+            logger.log("Payment canceled")
+        case .failed(error: let error):
+            logger.log("Payment error: \(error)")
+        }
     }
 }
 ```
