@@ -1,6 +1,25 @@
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
 
 import Foundation
+import SwiftUI
+
+#if SKIP
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+#elseif os(iOS)
+import StripePaymentSheet
+#endif
 
 public class SkipStripeModule {
+    public func stripeAPIDemo(merchantName: String) {
+        #if SKIP
+        let _ = PaymentSheet.Configuration.Builder(merchantDisplayName: merchantName)
+        #elseif os(iOS)
+        var configuration = PaymentSheet.Configuration()
+        configuration.merchantDisplayName = merchantName
+        #else
+        fatalError("Unsupported platform")
+        #endif
+    }
 }

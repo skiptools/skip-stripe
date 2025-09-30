@@ -11,11 +11,13 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "1.6.27"),
-        .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.0.0")
+        .package(url: "https://source.skip.tools/skip-ui.git", from: "1.0.0"),
+        .package(url: "https://github.com/stripe/stripe-ios.git", from: "24.24.1")
     ],
     targets: [
         .target(name: "SkipStripe", dependencies: [
-            .product(name: "SkipFoundation", package: "skip-foundation")
+            .product(name: "SkipUI", package: "skip-ui"),
+            .product(name: "Stripe", package: "stripe-ios", condition: .when(platforms: [.iOS])),
         ], resources: [.process("Resources")], plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SkipStripeTests", dependencies: [
             "SkipStripe",
