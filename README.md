@@ -1,6 +1,9 @@
 # SkipStripe
 
-This is a free [Skip](https://skip.tools) Swift/Kotlin library project containing the following modules:
+This is a free [Skip](https://skip.tools) Swift/Kotlin framework that 
+contains integration with the Stripe SDK's 'Mobile Payment Element
+for [iOS](https://docs.stripe.com/sdks/ios)
+and [Android](https://docs.stripe.com/sdks/android).
 
 ### Usage
 
