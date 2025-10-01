@@ -27,17 +27,36 @@ import PassKit
 /// and
 /// Android [`com.stripe.android.paymentsheet.PaymentSheet.Configuration`](https://stripe.dev/stripe-android/paymentsheet/com.stripe.android.paymentsheet/-payment-sheet/-configuration/index.html)
 public struct StripePaymentConfiguration {
+    /// The customer-facing business name.
     public var merchantName: String
+
+    /// The identifier of the Stripe Customer object.
+    /// See https://stripe.com/docs/api/customers/object#customer_object-id
     public var customerID: String
+
+    /// A short-lived token that allows the SDK to access a Customer's payment methods
+    ///
+    /// Represents an Ephemeral Key that can be used temporarily for API operations that typically require a secret key.
+    /// See https://docs.stripe.com/mobile/android/basic#set-up-ephemeral-key
     public var ephemeralKeySecret: String
+
     public var clientSecret: String
+
+    /// The label to use for the primary button.
     public var primaryButtonLabel: String?
+    /// If true, allows payment methods that do not move money at the end of the checkout. Defaults to false.
     public var allowsDelayedPaymentMethods: Bool?
+    /// If true, allows payment methods that require a shipping address, like Afterpay and Affirm. Defaults to false. Set this to true if you collect shipping addresses and set Configuration.shippingDetails or set shipping details directly on the PaymentIntent.
     public var allowsPaymentMethodsRequiringShippingAddress: Bool?
+    /// The billing information for the customer.
     public var defaultBillingDetails: BillingDetails?
+    /// The shipping information for the customer. If set, PaymentSheet will pre-populate the form fields with the values provided. This is used to display a "Billing address is same as shipping" checkbox if defaultBillingDetails is not provided. If name and line1 are populated, it's also attached to the PaymentIntent during payment.
     public var shippingDetails: AddressDetails?
+    /// A list of preferred networks that should be used to process payments made with a co-branded card if your user hasn't selected a network themselves.
     public var preferredNetworks: [CardBrand]?
+    /// Configuration related to Apple Pay. If set, PaymentSheet displays Apple Pay as a payment option (iOS only)
     public var applePay: ApplePayConfiguration?
+    /// Configuration related to Google Pay. If set, PaymentSheet displays Google Pay as a payment option (Android only)
     public var googlePay: GooglePayConfiguration?
 
     private static var paymentConfigurationInitialized = false
@@ -186,7 +205,7 @@ public struct StripePaymentConfiguration {
         }
 
         #if SKIP || os(iOS)
-        typealias PlatformBillingDetails = PaymentSheet.BillingDetails
+        typealias PlatformBillingDetails = PaymentSheet.BillingDetails // happens to be the same type name on iOS and Android
         var platformBillingDetails: PlatformBillingDetails {
             PaymentSheet.BillingDetails(address: address.platformAddress, email: email, name: name, phone: phone)
         }
@@ -214,7 +233,7 @@ public struct StripePaymentConfiguration {
         }
 
         #if SKIP || os(iOS)
-        typealias PlatformAddress = PaymentSheet.Address
+        typealias PlatformAddress = PaymentSheet.Address // happens to be the same type name on iOS and Android
 
         var platformAddress: PlatformAddress {
             PaymentSheet.Address(city: city, country: country, line1: line1, line2: line2, postalCode: postalCode, state: state)
@@ -222,7 +241,9 @@ public struct StripePaymentConfiguration {
         #endif
     }
 
-    /// [`PaymentSheet.ApplePayConfiguration`](https://stripe.dev/stripe-ios/stripepaymentsheet/documentation/stripepaymentsheet/paymentsheet/applepayconfiguration)
+    /// Supporting for adding [Apple Pay](https://docs.stripe.com/payments/accept-a-payment?platform=ios&ui=payment-sheet&uikit-swiftui=swiftui#ios-apple-pay) as a payment option.
+    ///
+    /// Wraps the iOS [`PaymentSheet.ApplePayConfiguration`](https://stripe.dev/stripe-ios/stripepaymentsheet/documentation/stripepaymentsheet/paymentsheet/applepayconfiguration)
     public struct ApplePayConfiguration: Equatable {
         public var merchantId: String
         public var merchantCountryCode: String
@@ -324,7 +345,9 @@ public struct StripePaymentConfiguration {
         }
     }
 
-    /// [`com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration`](https://stripe.dev/stripe-android/paymentsheet/com.stripe.android.paymentsheet/-payment-sheet/-google-pay-configuration/index.html)
+    /// Support for adding [Google Pay](https://docs.stripe.com/payments/accept-a-payment?platform=android&ui=payment-sheet#android-google-pay) as a option.
+    ///
+    /// Wraps [`com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration`](https://stripe.dev/stripe-android/paymentsheet/com.stripe.android.paymentsheet/-payment-sheet/-google-pay-configuration/index.html)
     public struct GooglePayConfiguration: Equatable {
         public var production: Bool = true
         public var countryCode: String
