@@ -37,11 +37,7 @@ public struct StripePaymentConfiguration {
     public var defaultBillingDetails: BillingDetails?
     public var shippingDetails: AddressDetails?
     public var preferredNetworks: [CardBrand]?
-
-    // https://stripe.dev/stripe-ios/stripepaymentsheet/documentation/stripepaymentsheet/paymentsheet/applepayconfiguration
     public var applePay: ApplePayConfiguration?
-
-    // TODO: https://stripe.dev/stripe-android/paymentsheet/com.stripe.android.paymentsheet/-payment-sheet/-google-pay-configuration/index.html
     public var googlePay: GooglePayConfiguration?
 
     private static var paymentConfigurationInitialized = false
@@ -270,22 +266,39 @@ public struct StripePaymentConfiguration {
             #if os(iOS)
             var platformButtonType: PKPaymentButtonType {
                 switch self {
+                /// A button with the Apple Pay logo only, useful when an additional call to action isn’t needed.
                 case .plain: return PKPaymentButtonType.plain
+                /// A button for product purchases.
                 case .buy: return PKPaymentButtonType.buy
+                /// A button for prompting the user to set up a card.
                 case .setUp: return PKPaymentButtonType.setUp
+                /// A button for paying bills or invoices.
                 case .inStore: return PKPaymentButtonType.inStore
+                /// A button used by approved nonprofit organization that lets people make donations.
                 case .donate: return PKPaymentButtonType.donate
+                /// A button for purchase experiences that include other payment buttons that start with “Check out”.
                 case .checkout: return PKPaymentButtonType.checkout
+                /// A button for booking trips, flights, or other experiences.
                 case .book: return PKPaymentButtonType.book
+                /// A button for purchasing a subscription.
                 case .subscribe: return PKPaymentButtonType.subscribe
+                /// A button for adding money to a card, account, or payment system.
                 case .reload: return PKPaymentButtonType.reload
+                /// A button for adding money to a card, account, or payment system.
                 case .addMoney: return PKPaymentButtonType.addMoney
+                /// A button for adding money to a card, account, or payment system.
                 case .topUp: return PKPaymentButtonType.topUp
+                /// A button for placing orders for such as like meals or flowers.
                 case .order: return PKPaymentButtonType.order
+                /// A button for renting items such as cars or scooters.
                 case .rent: return PKPaymentButtonType.rent
+                /// A button for supporting people give money to projects, causes, organizations, and other entities.
                 case .support: return PKPaymentButtonType.support
+                /// A button for to help people contribute money to projects, causes, organizations, and other entities.
                 case .contribute: return PKPaymentButtonType.contribute
+                /// A button for useful for letting people tip for goods or services.
                 case .tip: return PKPaymentButtonType.tip
+                /// A button for general purchases.
                 case .continue: return PKPaymentButtonType.continue
                 }
             }
