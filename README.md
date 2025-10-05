@@ -13,6 +13,12 @@ For information on how to initialize the configuration object, see the Stripe do
 for [iOS](https://docs.stripe.com/payments/accept-a-payment?platform=ios&ui=payment-sheet)
 and [Android](https://docs.stripe.com/payments/accept-a-payment?platform=android&ui=payment-sheet).
 
+The `SkiperStrip` sample app in this repository shows a complete Skip-to-native integration using:
+
+- `skip-stripe/examples/PaymentSheetService.swift` – wrapper around Stripe's iOS payment sheet presenter.
+- `skip-stripe/examples/StripePaymentService.swift` – shared service that creates payment intents, ephemeral keys, and SkipStripe configurations for Android.
+- `skip-stripe/examples/ContentView.swift` – SwiftUI screen demonstrating both iOS and Android flows with `SimpleStripePaymentButton`.
+
 ```swift
 import SkipStripe
 
