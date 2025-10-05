@@ -73,6 +73,26 @@ struct PaymentButton: View {
 }
 ```
 
+## Usage Notes
+
+Using Stripe for payments is subject to the policies of the
+app marketplace that distributes the application.
+Generally speaking, they can be used for purchases and subscriptions for
+_non-digital_ goods, whereas digital purchses usually
+use the native billing system of the hosting service.
+
+For more details, see:
+
+  - [Make in-app purchases in Android apps](https://support.google.com/googleplay/answer/1061913)
+  - [Understanding Google Play’s Payments policy](https://support.google.com/googleplay/android-developer/answer/10281818)
+  - [Apple App Review Guidelines: In-App Purchase](https://developer.apple.com/app-store/review/guidelines/#in-app-purchase)
+  - [Apple Human Interface Guidelines: In-app purchase](https://developer.apple.com/design/human-interface-guidelines/in-app-purchase)
+
+For interfacing with the native in-app purchasing system on
+the host device, consider using the
+[SkipMarketplace](https://github.com/skiptools/skip-marketplace)
+framework instead.
+
 ## Building
 
 This project is a free Swift Package Manager module that uses the
