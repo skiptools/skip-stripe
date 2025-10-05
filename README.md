@@ -5,6 +5,28 @@ contains integration with the Stripe SDK's 'Mobile Payment Element
 for [iOS](https://docs.stripe.com/sdks/ios)
 and [Android](https://docs.stripe.com/sdks/android).
 
+## Setup
+
+To include this framework in your project, add the following
+dependency to your `Package.swift` file:
+
+```swift
+let package = Package(
+    name: "my-package",
+    products: [
+        .library(name: "MyProduct", targets: ["MyTarget"]),
+    ],
+    dependencies: [
+        .package(url: "https://source.skip.tools/skip-stripe.git", "0.0.0"..<"2.0.0"),
+    ],
+    targets: [
+        .target(name: "MyTarget", dependencies: [
+            .product(name: "SkipStripe", package: "skip-stripe")
+        ])
+    ]
+)
+```
+
 ### Usage
 
 The API includes a `StripePaymentButton` which is created using a `StripePaymentConfiguration`.
