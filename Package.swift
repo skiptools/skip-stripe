@@ -1,5 +1,5 @@
 // swift-tools-version: 5.9
-// This is a Skip (https://skip.tools) package.
+// This is a Skip (https://skip.dev) package.
 import PackageDescription
 
 let package = Package(
@@ -12,7 +12,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "1.6.27"),
         .package(url: "https://source.skip.tools/skip-ui.git", from: "1.0.0"),
-        .package(url: "https://github.com/stripe/stripe-ios.git", from: "24.24.1")
+        .package(url: "https://github.com/stripe/stripe-ios.git", from: "25.6.3")
     ],
     targets: [
         .target(name: "SkipStripe", dependencies: [
