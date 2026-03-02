@@ -13,7 +13,7 @@ let package = Package(
         .package(url: "https://source.skip.tools/skip.git", from: "1.6.27"),
         .package(url: "https://source.skip.tools/skip-fuse-ui.git", from: "1.0.0"),
         .package(url: "https://source.skip.tools/skip-firebase.git", "0.10.0"..<"2.0.0"),
-        .package(url: "https://source.skip.tools/skip-stripe.git", from: "0.0.1")
+        .package(url: "https://source.skip.tools/skip-stripe.git", from: "0.2.0")
     ],
     targets: [
         .target(name: "SkiperStrip", dependencies: [

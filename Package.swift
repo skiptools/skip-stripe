@@ -1,5 +1,5 @@
 // swift-tools-version: 5.9
-// This is a Skip (https://skip.tools) package.
+// This is a Skip (https://skip.dev) package.
 import PackageDescription
 
 let package = Package(
@@ -10,9 +10,10 @@ let package = Package(
         .library(name: "SkipStripe", type: .dynamic, targets: ["SkipStripe"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "1.7.2"),
+        .package(url: "https://source.skip.tools/skip.git", from: "1.6.27"),
         .package(url: "https://source.skip.tools/skip-ui.git", from: "1.0.0"),
-        .package(url: "https://github.com/stripe/stripe-ios.git", from: "25.7.0")
+        .package(url: "https://github.com/stripe/stripe-ios.git", from: "25.7.0"),
+        .package(url: "https://github.com/stripe/stripe-terminal-ios.git", from: "5.2.0")
     ],
     targets: [
         .target(name: "SkipStripe", dependencies: [
@@ -20,7 +21,8 @@ let package = Package(
             .product(name: "Stripe", package: "stripe-ios", condition: .when(platforms: [.iOS])),
             .product(name: "StripeConnect", package: "stripe-ios", condition: .when(platforms: [.iOS])),
             .product(name: "StripePaymentSheet", package: "stripe-ios", condition: .when(platforms: [.iOS])),
-        ], resources: [.process("Resources")], plugins: [.plugin(name: "skipstone", package: "skip")]),
+            .product(name: "StripeTerminal", package: "stripe-terminal-ios", condition: .when(platforms: [.iOS])),
+        ], plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SkipStripeTests", dependencies: [
             "SkipStripe",
             .product(name: "SkipTest", package: "skip")
@@ -39,4 +41,3 @@ if Context.environment["SKIP_BRIDGE"] ?? "0" != "0" {
         return .library(name: libraryProduct.name, type: .dynamic, targets: libraryProduct.targets)
     })
 }
-

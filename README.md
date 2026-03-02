@@ -1,9 +1,11 @@
 # SkipStripe
 
-This is a free [Skip](https://skip.dev) Swift/Kotlin framework that 
-contains integration with the Stripe SDK's 'Mobile Payment Element
-for [iOS](https://docs.stripe.com/sdks/ios)
-and [Android](https://docs.stripe.com/sdks/android).
+A free [Skip](https://skip.dev) Swift/Kotlin framework that provides cross-platform integration with the Stripe SDK for both **online payments** (Payment Sheet) and **in-person payments** (Stripe Terminal) on [iOS](https://docs.stripe.com/sdks/ios) and [Android](https://docs.stripe.com/sdks/android).
+
+## Features
+
+- **Payment Sheet** — Present Stripe's pre-built payment UI for online purchases, subscriptions, and more. Supports Apple Pay (iOS) and Google Pay (Android).
+- **Stripe Terminal** — Accept in-person card payments with physical Stripe readers (M2, Chipper 2X, WisePOS E, S700) and Tap to Pay on iPhone/Android.
 
 ## Setup
 
@@ -26,6 +28,10 @@ let package = Package(
     ]
 )
 ```
+
+---
+
+## Payment Sheet (Online Payments)
 
 ### Usage
 
@@ -72,6 +78,103 @@ struct PaymentButton: View {
     }
 }
 ```
+
+---
+
+## Stripe Terminal (In-Person Payments)
+
+SkipStripe includes full support for [Stripe Terminal](https://stripe.com/terminal), enabling your app to accept in-person card payments with physical readers on both iOS and Android using a single Swift API.
+
+### Supported Readers
+
+| Reader | Type | Connection |
+|--------|------|------------|
+| Stripe M2 | Portable | Bluetooth |
+| Chipper 2X | Portable | Bluetooth |
+| WisePad 3 | Portable | Bluetooth |
+| Stripe S700 | Countertop | WiFi / Ethernet |
+| WisePOS E | Countertop | WiFi / Ethernet |
+| Tap to Pay on iPhone | Built-in | NFC |
+| Tap to Pay on Android | Built-in | NFC |
+
+### Quick Start
+
+```swift
+import SkipStripe
+
+// 1. Initialize the Terminal SDK (once at app launch)
+StripeTerminalManager.shared.initialize(tokenProvider: myTokenProvider)
+
+// 2. Discover nearby readers
+StripeTerminalManager.shared.discoverReaders(method: .bluetoothScan)
+
+// 3. Connect to a reader
+let reader = StripeTerminalManager.shared.discoveredReaders[0]
+StripeTerminalManager.shared.connectReader(reader, locationId: "tml_xxx") { result in
+    switch result {
+    case .success(let connected):
+        print("Connected: \(connected.serialNumber)")
+    case .failure(let error):
+        print("Error: \(error.localizedDescription)")
+    }
+}
+
+// 4. Collect a payment ($15.00)
+StripeTerminalManager.shared.collectPayment(amount: 1500, currency: "usd") { result in
+    switch result {
+    case .success(let paymentIntentId):
+        print("Payment success: \(paymentIntentId)")
+    case .failure(let error):
+        print("Payment failed: \(error.localizedDescription)")
+    }
+}
+
+// 5. Disconnect when done
+StripeTerminalManager.shared.disconnectReader { error in }
+```
+
+### Terminal Prerequisites
+
+1. **Stripe account** with [Terminal enabled](https://dashboard.stripe.com/terminal)
+2. **Backend server** (e.g., Firebase Cloud Functions) to create connection tokens and Terminal locations
+3. **A token provider** — implement `StripeTerminalTokenProvider` to fetch connection tokens from your backend. On Android, you can use the built-in `URLConnectionTokenProvider` which handles Firebase Auth automatically.
+
+### Platform Setup
+
+#### iOS
+
+Add to your `Info.plist`:
+- `NSBluetoothAlwaysUsageDescription` — for Bluetooth readers
+- `NSLocationWhenInUseUsageDescription` — required by Stripe Terminal
+- `NSLocalNetworkUsageDescription` + `NSBonjourServices` — for Internet readers
+- `NFCReaderUsageDescription` — for Tap to Pay on iPhone
+
+#### Android
+
+Add to your `AndroidManifest.xml`:
+- Bluetooth permissions: `BLUETOOTH`, `BLUETOOTH_ADMIN`, `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`
+- Location permissions: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`
+- `NFC` permission for Tap to Pay
+- `INTERNET` permission
+
+### Key Types
+
+| Type | Description |
+|------|-------------|
+| `StripeTerminalManager` | Singleton managing the full Terminal lifecycle (discovery, connection, payments) |
+| `StripeTerminalReader` | Model representing a discovered or connected reader |
+| `StripeTerminalTokenProvider` | Protocol you implement to fetch connection tokens from your backend |
+| `URLConnectionTokenProvider` | Built-in Android token provider using Firebase Auth |
+| `AuthenticatedCloudFunctionCaller` | Helper for calling Cloud Functions with Firebase Auth (Android) |
+| `TerminalConnectionStatus` | Enum: `.notConnected`, `.connecting`, `.connected` |
+| `TerminalPaymentStatus` | Enum: `.notReady`, `.ready`, `.waitingForInput`, `.processing` |
+| `ReaderDiscoveryMethod` | Enum: `.bluetoothScan`, `.internet`, `.localMobile` |
+
+### Full Documentation
+
+For a complete step-by-step guide including backend setup, platform configuration, code examples, architecture notes, and troubleshooting, see the **[Terminal Integration Guide](docs/TERMINAL_GUIDE.md)**.
+
+---
 
 ## Usage Notes
 
