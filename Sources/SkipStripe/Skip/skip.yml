@@ -10,3 +10,5 @@ build:
     - block: 'dependencies'
       contents:
         - 'implementation("com.stripe:stripe-android:22.8.1")'
+        - 'implementation("com.stripe:stripeterminal:5.2.0")'
+        - 'implementation("com.google.firebase:firebase-auth:23.2.0")'

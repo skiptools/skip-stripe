@@ -15,7 +15,7 @@ struct StripePaymentService {
 
     struct Configuration {
         /// Update this to match the deployed Cloud Functions base URL.
-        static let baseURLString = "https://us-central1-yourapp.cloudfunctions.net" // This is the endpoint that I use for Firebase. If you are using a different endpoint, see Stripe's Integration Guide for how to set up webhooks. 
+        static let baseURLString = "https://us-central1-YOUR-APP.cloudfunctions.net" // This is the endpoint that I use for Firebase. If you are using a different endpoint, see Stripe's Integration Guide for how to set up webhooks.
     }
 
     enum ServiceError: LocalizedError {
