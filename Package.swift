@@ -6,7 +6,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
-        .library(name: "SkipStripe", type: .dynamic, targets: ["SkipStripe"]),
+        .library(name: "SkipStripe", targets: ["SkipStripe"]),
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "1.7.2"),
