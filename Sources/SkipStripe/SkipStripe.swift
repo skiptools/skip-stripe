@@ -413,6 +413,96 @@ public enum StripePaymentResult {
     case failed(error: Error)
 }
 
+#if !SKIP && os(iOS)
+extension StripePaymentConfiguration {
+    /// The iOS payment sheet for this configuration.
+    func platformPaymentSheet() -> PaymentSheet {
+        var paymentConfig = PaymentSheet.Configuration()
+        paymentConfig.customer = PaymentSheet.CustomerConfiguration(id: customerID, ephemeralKeySecret: ephemeralKeySecret)
+        paymentConfig.merchantDisplayName = merchantName
+
+        if let applePay {
+            paymentConfig.applePay = applePay.platformApplePay
+        }
+        if let preferredNetworks {
+            paymentConfig.preferredNetworks = preferredNetworks.map(\.platformCardbrand)
+        }
+        if let primaryButtonLabel {
+            paymentConfig.primaryButtonLabel = primaryButtonLabel
+        }
+        if let allowsDelayedPaymentMethods {
+            paymentConfig.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods
+        }
+        if let allowsPaymentMethodsRequiringShippingAddress {
+            paymentConfig.allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress
+        }
+        if let defaultBillingDetails {
+            paymentConfig.defaultBillingDetails = defaultBillingDetails.platformBillingDetails
+        }
+        if let shippingDetails {
+            paymentConfig.shippingDetails = { shippingDetails.platformShippingDetails }
+        }
+
+        return PaymentSheet(paymentIntentClientSecret: clientSecret, configuration: paymentConfig)
+    }
+}
+
+extension StripePaymentResult {
+    init(_ result: PaymentSheetResult) {
+        switch result {
+        case .completed:
+            self = .completed
+        case .canceled:
+            self = .canceled
+        case .failed(error: let error):
+            self = .failed(error: error)
+        }
+    }
+}
+#elseif SKIP
+extension StripePaymentConfiguration {
+    /// The Android payment sheet configuration for this configuration.
+    func platformPaymentSheetConfiguration() -> PaymentSheet.Configuration {
+        let customerConfig = PaymentSheet.CustomerConfiguration(id: customerID, ephemeralKeySecret: ephemeralKeySecret)
+        var cfgbuilder = PaymentSheet.Configuration.Builder(merchantDisplayName: merchantName)
+        cfgbuilder = cfgbuilder.customer(customerConfig)
+        if let googlePay = googlePay {
+            cfgbuilder = cfgbuilder.googlePay(googlePay.platformGooglePay)
+        }
+        if let preferredNetworks = preferredNetworks {
+            cfgbuilder = cfgbuilder.preferredNetworks(preferredNetworks.map(\.platformCardbrand).toList())
+        }
+        if let primaryButtonLabel = primaryButtonLabel {
+            cfgbuilder = cfgbuilder.primaryButtonLabel(primaryButtonLabel)
+        }
+        if let allowsDelayedPaymentMethods = allowsDelayedPaymentMethods {
+            cfgbuilder = cfgbuilder.allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+        }
+        if let allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress {
+            cfgbuilder = cfgbuilder.allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+        }
+        if let defaultBillingDetails = defaultBillingDetails {
+            cfgbuilder = cfgbuilder.defaultBillingDetails(defaultBillingDetails.platformBillingDetails)
+        }
+        if let shippingDetails = shippingDetails {
+            cfgbuilder = cfgbuilder.shippingDetails(shippingDetails.platformShippingDetails)
+        }
+        return cfgbuilder.build()
+    }
+}
+
+/// Translates an Android `PaymentSheetResult` into a `StripePaymentResult`.
+func stripePaymentResult(_ result: PaymentSheetResult) -> StripePaymentResult {
+    if result is PaymentSheetResult.Completed {
+        return StripePaymentResult.completed
+    } else if result is PaymentSheetResult.Failed {
+        return StripePaymentResult.failed(error: ErrorException((result as! PaymentSheetResult.Failed).error))
+    } else {
+        return StripePaymentResult.canceled
+    }
+}
+#endif
+
 /// A button that will present the Stripe payment sheet for the given configuration
 // SKIP @nobridge // SkipFuse does not currently view wrappers so we need to use a `SimpleStripePaymentButton`
 public struct StripePaymentButton<Label>: View where Label : View {
@@ -429,94 +519,19 @@ public struct StripePaymentButton<Label>: View where Label : View {
     public var body: some View {
         #if !SKIP && !os(iOS)
         fatalError("Unsupported platform")
-        #else
-        let customerConfig = PaymentSheet.CustomerConfiguration(id: configuration.customerID, ephemeralKeySecret: configuration.ephemeralKeySecret)
-
-        #if !SKIP
-        var paymentConfig = PaymentSheet.Configuration()
-        paymentConfig.customer = customerConfig
-        paymentConfig.merchantDisplayName = configuration.merchantName
-
-        if let applePay = configuration.applePay {
-            paymentConfig.applePay = applePay.platformApplePay
-        }
-        if let preferredNetworks = configuration.preferredNetworks {
-            paymentConfig.preferredNetworks = preferredNetworks.map(\.platformCardbrand)
-        }
-        if let primaryButtonLabel = configuration.primaryButtonLabel {
-            paymentConfig.primaryButtonLabel = primaryButtonLabel
-        }
-        if let allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods {
-            paymentConfig.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods
-        }
-        if let allowsPaymentMethodsRequiringShippingAddress = configuration.allowsPaymentMethodsRequiringShippingAddress {
-            paymentConfig.allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress
-        }
-        if let defaultBillingDetails = configuration.defaultBillingDetails {
-            paymentConfig.defaultBillingDetails = defaultBillingDetails.platformBillingDetails
-        }
-        if let shippingDetails = configuration.shippingDetails {
-            paymentConfig.shippingDetails = { shippingDetails.platformShippingDetails }
-        }
-
-        let paymentSheet = PaymentSheet(paymentIntentClientSecret: configuration.clientSecret, configuration: paymentConfig)
-
-        return PaymentSheet.PaymentButton(paymentSheet: paymentSheet, onCompletion: { result in
-            // translate PaymentSheetResult into StripePaymentResult
-            switch result {
-            case .completed:
-                self.completion(StripePaymentResult.completed)
-            case .canceled:
-                self.completion(StripePaymentResult.canceled)
-            case .failed(error: let error):
-                self.completion(StripePaymentResult.failed(error: error))
-            }
+        #elseif !SKIP
+        return PaymentSheet.PaymentButton(paymentSheet: configuration.platformPaymentSheet(), onCompletion: { result in
+            self.completion(StripePaymentResult(result))
         }, content: buttonLabel)
         #else
-        var cfgbuilder = PaymentSheet.Configuration.Builder(merchantDisplayName: configuration.merchantName)
-        cfgbuilder = cfgbuilder.customer(customerConfig)
-        if let googlePay = configuration.googlePay {
-            cfgbuilder = cfgbuilder.googlePay(googlePay.platformGooglePay)
-        }
-        if let preferredNetworks = configuration.preferredNetworks {
-            cfgbuilder = cfgbuilder.preferredNetworks(preferredNetworks.map(\.platformCardbrand).toList())
-        }
-        if let primaryButtonLabel = configuration.primaryButtonLabel {
-            cfgbuilder = cfgbuilder.primaryButtonLabel(primaryButtonLabel)
-        }
-        if let allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods {
-            cfgbuilder = cfgbuilder.allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
-        }
-        if let allowsPaymentMethodsRequiringShippingAddress = configuration.allowsPaymentMethodsRequiringShippingAddress {
-            cfgbuilder = cfgbuilder.allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
-        }
-        if let defaultBillingDetails = configuration.defaultBillingDetails {
-            cfgbuilder = cfgbuilder.defaultBillingDetails(defaultBillingDetails.platformBillingDetails)
-        }
-        if let shippingDetails = configuration.shippingDetails {
-            cfgbuilder = cfgbuilder.shippingDetails(shippingDetails.platformShippingDetails)
-        }
-
-        let paymentConfig = cfgbuilder.build()
-
-        let callback = completion
-
-        var builder = PaymentSheet.Builder({ result in
-            // translate PaymentSheetResult into StripePaymentResult
-            if result is PaymentSheetResult.Completed {
-                self.completion(StripePaymentResult.completed)
-            } else if result is PaymentSheetResult.Canceled {
-                self.completion(StripePaymentResult.canceled)
-            } else if result is PaymentSheetResult.Failed {
-                self.completion(StripePaymentResult.failed(error: ErrorException(result.error)))
-            }
-        })
-        let paymentSheet = builder.build()
+        let paymentConfig = configuration.platformPaymentSheetConfiguration()
+        let paymentSheet = PaymentSheet.Builder({ result in
+            self.completion(stripePaymentResult(result))
+        }).build()
 
         Button(action: {
             paymentSheet.presentWithPaymentIntent(configuration.clientSecret, paymentConfig)
         }, label: buttonLabel)
-        #endif
         #endif
     }
 }
@@ -539,5 +554,48 @@ public struct SimpleStripePaymentButton: View {
         }
     }
 }
-#endif
 
+/// Presents the Stripe payment sheet for `configuration` when `isPresented` becomes true.
+///
+/// Use this instead of `StripePaymentButton` when the payment intent can only be created after
+/// the user taps your own button: create the configuration, then set `isPresented` to true.
+/// Set it back to false in `completion`. Place it anywhere in the hierarchy, e.g. in a `.background`.
+public struct StripePaymentSheetPresenter: View {
+    let configuration: StripePaymentConfiguration?
+    let isPresented: Bool
+    let completion: (StripePaymentResult) -> Void
+
+    public init(configuration: StripePaymentConfiguration?, isPresented: Bool, completion: @escaping (StripePaymentResult) -> Void) {
+        self.configuration = configuration
+        self.isPresented = isPresented
+        self.completion = completion
+    }
+
+    public var body: some View {
+        #if !SKIP && !os(iOS)
+        fatalError("Unsupported platform")
+        #elseif !SKIP
+        if let configuration {
+            Color.clear
+                .frame(width: 0, height: 0)
+                .paymentSheet(isPresented: Binding(get: { isPresented }, set: { _ in }), paymentSheet: configuration.platformPaymentSheet(), onCompletion: { result in
+                    self.completion(StripePaymentResult(result))
+                })
+        }
+        #else
+        let paymentSheet = PaymentSheet.Builder({ result in
+            self.completion(stripePaymentResult(result))
+        }).build()
+
+        Color.clear
+            .frame(width: 0, height: 0)
+            .task(id: isPresented) {
+                // keyed on isPresented so the sheet is shown once per false → true transition
+                if isPresented, let configuration = configuration {
+                    paymentSheet.presentWithPaymentIntent(configuration.clientSecret, configuration.platformPaymentSheetConfiguration())
+                }
+            }
+        #endif
+    }
+}
+#endif

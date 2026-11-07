@@ -73,6 +73,34 @@ struct PaymentButton: View {
 }
 ```
 
+### Presenting the payment sheet from your own action
+
+`StripePaymentButton` needs the configuration (and thus the payment intent) before it is shown.
+When the payment intent can only be created after the user taps, use `StripePaymentSheetPresenter`:
+create the configuration in your own button's action, then set `isPresented` to true.
+
+```swift
+struct CheckoutView: View {
+    @State var paymentConfig: StripePaymentConfiguration?
+    @State var isPaymentSheetPresented = false
+
+    var body: some View {
+        Button("Pay Now!") {
+            Task {
+                paymentConfig = try await createPaymentConfiguration() // your backend call
+                isPaymentSheetPresented = true
+            }
+        }
+        .background(
+            StripePaymentSheetPresenter(configuration: paymentConfig, isPresented: isPaymentSheetPresented) { result in
+                isPaymentSheetPresented = false
+                // handle result as above
+            }
+        )
+    }
+}
+```
+
 ## Usage Notes
 
 Using Stripe for payments is subject to the policies of the
